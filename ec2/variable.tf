@@ -14,12 +14,18 @@ variable "subnet_id" {
   type        = string
 }
 
-variable "ssh_cidr" {
-  description = "Allowed SSH source as a single public IPv4 address in /32 CIDR notation."
-  type        = string
-
-  validation {
-    condition     = can(cidrnetmask(var.ssh_cidr)) && endswith(var.ssh_cidr, "/32")
-    error_message = "Use a single IPv4 address in /32 CIDR notation."
-  }
+variable "ingress_rules" {
+  description = "Inbound security group rules for the workshop Jenkins host."
+  type = list(object({
+    description      = optional(string)
+    from_port        = number
+    to_port          = number
+    protocol         = string
+    cidr_blocks      = optional(list(string), [])
+    ipv6_cidr_blocks = optional(list(string), [])
+    prefix_list_ids  = optional(list(string), [])
+    security_groups  = optional(list(string), [])
+    self             = optional(bool, false)
+  }))
+  nullable = false
 }

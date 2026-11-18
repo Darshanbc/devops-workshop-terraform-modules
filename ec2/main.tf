@@ -29,13 +29,7 @@ resource "aws_security_group" "ssh" {
   description = "SSH access to the workshop Jenkins host"
   vpc_id      = data.aws_subnet.selected.vpc_id
 
-  ingress {
-    description = "SSH from the student IP"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.ssh_cidr]
-  }
+  ingress = var.ingress_rules
 
   egress {
     description = "Outbound access for software installation"
@@ -63,7 +57,3 @@ resource "aws_instance" "this" {
   }
 }
 
-moved {
-  from = aws_instance.jenkins
-  to   = aws_instance.this
-}
