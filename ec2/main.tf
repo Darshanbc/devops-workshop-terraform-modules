@@ -46,7 +46,7 @@ resource "aws_security_group" "ssh" {
   }
 }
 
-resource "aws_instance" "jenkins" {
+resource "aws_instance" "this" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
@@ -61,4 +61,9 @@ resource "aws_instance" "jenkins" {
   tags = {
     Name = "workshop-jenkins"
   }
+}
+
+moved {
+  from = aws_instance.jenkins
+  to   = aws_instance.this
 }

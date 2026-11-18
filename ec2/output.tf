@@ -1,6 +1,6 @@
 output "public_ip" {
   description = "Public IPv4 address for SSH."
-  value       = aws_instance.jenkins.public_ip
+  value       = aws_instance.this.public_ip
 }
 
 output "private_key" {
