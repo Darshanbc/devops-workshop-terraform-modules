@@ -1,0 +1,64 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+  }
+}
+
+data "aws_subnet" "selected" {
+  id = var.subnet_id
+}
+
+resource "tls_private_key" "ssh" {
+  algorithm = "ED25519"
+}
+
+resource "aws_key_pair" "ssh" {
+  key_name_prefix = "workshop-jenkins-"
+  public_key      = tls_private_key.ssh.public_key_openssh
+}
+
+resource "aws_security_group" "ssh" {
+  name_prefix = "workshop-jenkins-"
+  description = "SSH access to the workshop Jenkins host"
+  vpc_id      = data.aws_subnet.selected.vpc_id
+
+  ingress {
+    description = "SSH from the student IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.ssh_cidr]
+  }
+
+  egress {
+    description = "Outbound access for software installation"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "jenkins" {
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.subnet_id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.ssh.id]
+  key_name                    = aws_key_pair.ssh.key_name
+
+  metadata_options {
+    http_tokens = "required"
+  }
+
+  tags = {
+    Name = "workshop-jenkins"
+  }
+}
