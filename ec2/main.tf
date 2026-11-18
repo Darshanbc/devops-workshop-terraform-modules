@@ -11,23 +11,23 @@ terraform {
   }
 }
 
-data "aws_subnet" "selected" {
+data "aws_subnet" "this" {
   id = var.subnet_id
 }
 
-resource "tls_private_key" "ssh" {
+resource "tls_private_key" "this" {
   algorithm = "ED25519"
 }
 
-resource "aws_key_pair" "ssh" {
+resource "aws_key_pair" "this" {
   key_name_prefix = "workshop-jenkins-"
-  public_key      = tls_private_key.ssh.public_key_openssh
+  public_key      = tls_private_key.this.public_key_openssh
 }
 
-resource "aws_security_group" "ssh" {
+resource "aws_security_group" "this" {
   name_prefix = "workshop-jenkins-"
   description = "SSH access to the workshop Jenkins host"
-  vpc_id      = data.aws_subnet.selected.vpc_id
+  vpc_id      = data.aws_subnet.this.vpc_id
 
   ingress = var.ingress_rules
 
@@ -45,8 +45,8 @@ resource "aws_instance" "this" {
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
-  vpc_security_group_ids      = [aws_security_group.ssh.id]
-  key_name                    = aws_key_pair.ssh.key_name
+  vpc_security_group_ids      = [aws_security_group.this.id]
+  key_name                    = aws_key_pair.this.key_name
 
   metadata_options {
     http_tokens = "required"
