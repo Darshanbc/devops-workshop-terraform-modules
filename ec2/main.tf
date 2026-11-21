@@ -47,6 +47,7 @@ resource "aws_instance" "this" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.this.id]
   key_name                    = aws_key_pair.this.key_name
+  iam_instance_profile        = one(aws_iam_instance_profile.ecr_pull[*].name)
 
   metadata_options {
     http_tokens = "required"

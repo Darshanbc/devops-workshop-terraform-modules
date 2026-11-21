@@ -29,3 +29,14 @@ variable "ingress_rules" {
   }))
   nullable = false
 }
+
+variable "ecr_repository_arn" {
+  description = "ARN of the private ECR repository this host can pull from. Leave null to omit the IAM instance profile."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.ecr_repository_arn == null ? true : can(regex("^arn:[^:]+:ecr:[^:]+:[0-9]{12}:repository/[^*?]+$", var.ecr_repository_arn))
+    error_message = "Use the ARN of a single private ECR repository."
+  }
+}
